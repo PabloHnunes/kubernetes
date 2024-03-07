@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: finance-api-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: finance-api
+  template:
+    metadata:
+      name: finance-api
+      labels:
+        app: finance-api
+    spec:
+      containers:
+        - name: finance-api
+          image: pablohhnunes/finance_api:1.1.1
+          ports:
+            - containerPort: 8085
+          envFrom:
+            - configMapRef:
+                name: app-finance-configmap
+          resources:
+            requests:
+              cpu: 10m
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8085
+            periodSeconds: 10
+            failureThreshold: 1
+            initialDelaySeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health/database
+              port: 8085
+            periodSeconds: 10
+            failureThreshold: 5
+            initialDelaySeconds: 3
